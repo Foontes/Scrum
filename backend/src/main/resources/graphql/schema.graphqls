@@ -1,0 +1,88 @@
+scalar UUID     
+scalar DateTime
+
+enum Role               { USER, ADMIN }
+enum ProjectPermission  { VIEWER, EDITOR }
+enum LoginEventType     { LOGIN, LOGOUT }
+
+type User {
+  id: UUID!
+  name: String!
+  email: String!
+  role: Role!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  projects: [Project!]!
+  sessions: [UserSession!]!
+}
+
+type Project {
+  id: UUID!
+  name: String!
+  description: String
+  createdAt: DateTime!
+  owner: User!
+  members: [ProjectMember!]!
+  tasks: [Task!]!
+}
+
+type ProjectMember {
+  id: ID!
+  permission: ProjectPermission!
+  user: User!
+}
+
+type Task {
+  id: UUID!
+  title: String!
+  description: String
+  dueDate: String      
+  createdAt: DateTime!
+  creator: User!
+  assignee: User
+  project: Project!
+}
+
+type LoginEvent {
+  id: ID!
+  type: LoginEventType!
+  timestamp: DateTime!
+  user: User!
+}
+
+type UserSession {
+  id: ID!
+  startAt: DateTime!
+  endAt: DateTime
+  user: User!
+}
+
+type Query {
+  users: [User!]!
+  user(id: UUID!): User
+
+  projects: [Project!]!
+  project(id: UUID!): Project
+
+  tasks(projectId: UUID): [Task!]!
+  task(id: UUID!): Task
+}
+
+
+type Mutation {
+  createUser(name: String!, email: String!, password: String!, role: Role = USER): User!
+  updateUser(id: UUID!, name: String, email: String, password: String, role: Role): User!
+  deleteUser(id: UUID!): Boolean!
+
+  createProject(name: String!, description: String, ownerId: UUID!): Project!
+  updateProject(id: UUID!, name: String, description: String, ownerId: UUID): Project!
+  deleteProject(id: UUID!): Boolean!
+
+  createTask(title: String!, description: String, dueDate: String, projectId: UUID!, assigneeId: UUID): Task!
+  updateTask(id: UUID!, title: String, description: String, dueDate: String, projectId: UUID, assigneeId: UUID): Task!
+  deleteTask(id: UUID!): Boolean!
+
+  addProjectMember(projectId: UUID!, userId: UUID!, permission: ProjectPermission!): ProjectMember!
+  updateProjectMember(id: ID!, permission: ProjectPermission!): ProjectMember!
+  removeProjectMember(id: ID!): Boolean!
+}
