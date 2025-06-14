@@ -1,0 +1,42 @@
+services:
+  database:
+    image: postgres:16
+    container_name: database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: database
+    networks:
+      - scrum
+    ports:
+      - "5432:5432"
+    volumes:
+      - database_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    container_name: backend
+    ports:
+      - "8080:8080"
+    entrypoint: ["java", "-jar", "/app.jar"]
+    networks:
+      - scrum
+    depends_on:
+    - database
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - "4200:4200"
+    networks:
+      - scrum
+
+networks:
+  scrum:
+    driver: bridge
+
+volumes:
+  database_data:
